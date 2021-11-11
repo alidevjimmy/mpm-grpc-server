@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package report;
+
+option go_package = "/reportpb";
+
+
+service ReportService {
+    // create new record perhaps by sensor or a person
+    rpc CreateReport (SensorReportRequest) returns (SensorReportResponse) {};
+    // get report information by id
+    rpc GetReport (GetReportRequest) returns (GetReportResponse) {} ;
+    // get all uncompleted reports by server streaming technique
+    rpc GetUnCompletedReports (GetUnCompletedReportsRequest) returns (stream GetUnCompletedReportsResponse) {} ;
+    // get all logs which are relevant to specified report with "id"
+    rpc GetReportLogs (GetReportLogRequest) returns (stream GetReportLogResponse) {};
+
+    // rpc AllGetLogs
+    // rpc sensor logs
+}
+
+message Report {
+    string id = 1;
+    int32 fault_id = 2;
+    int32 sensor_id = 3;
+    enum Status {
+        Default = 0;
+        LOW = 1;
+        MEDIUM = 2;
+        HIGH = 3;
+    }
+    // if not specified => field will be LOW (1)
+    Status status = 4;
+    repeated string tags = 5;
+}
+
+message ReportLog {
+    string title = 1;
+    int32 user_id = 2;
+    int32 report_id = 3;
+    string description = 4;
+}
+
+message SensorReportRequest {
+    Report report = 1;
+}
+
+message SensorReportResponse {
+    Report Report = 1;
+}
+
+message GetReportRequest {
+    string report_id = 1;
+}
+
+message GetReportResponse {
+    Report report = 1;
+}
+
+message GetUnCompletedReportsRequest {
+
+}
+
+message GetUnCompletedReportsResponse {
+    Report report = 1;
+}
+
+message GetReportLogRequest {
+    string report_id = 1;
+}
+
+message GetReportLogResponse {
+    ReportLog report_log = 1;
+}

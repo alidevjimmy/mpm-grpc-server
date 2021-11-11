@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package report;
+
+option go_package = "/reportpb";
+
+
+service ReportService {
+    // get all logs which are relevant to specified user with "id"
+    rpc GetUserLogs (GetUserLogsRequest) returns (stream GetUserLogsResponse) {};
+
+}
