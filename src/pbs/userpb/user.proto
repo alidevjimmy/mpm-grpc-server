@@ -6,9 +6,11 @@ option go_package = "/userpb";
 option csharp_namespace = "GrpcServer";
 
 service UserService {
+    // Errors: Internal , NotFound
     rpc Login(LoginRequest) returns (LoginResponse) {};
     // get all logs which are relevant to specified user with "id"
     rpc GetUserLogs (GetUserLogsRequest) returns (stream GetUserLogsResponse) {};
+    // Errors: Internal
     rpc StoreNewToken(StoreNewTokenRequest) returns (StoreNewTokenResponse) {}; 
 }
 

@@ -8,6 +8,7 @@ option csharp_namespace = "GrpcServer";
 
 service ReportService {
     // create new record perhaps by sensor or a person
+    // Errors: Internal
     rpc CreateReport (SensorReportRequest) returns (SensorReportResponse) {};
     // get report information by id
     rpc GetReport (GetReportRequest) returns (GetReportResponse) {} ;
