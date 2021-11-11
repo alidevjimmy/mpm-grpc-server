@@ -3,6 +3,7 @@ syntax = "proto3";
 package report;
 
 option go_package = "/reportpb";
+option csharp_namespace = "GrpcServer";
 
 
 service ReportService {

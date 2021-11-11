@@ -27,17 +27,17 @@ func (r *ReportServer) CreateReport(ctx context.Context, req *reportpb.SensorRep
 		FaultID:  int(report.GetFaultId()),
 		SensorID: int(report.GetSensorId()),
 		Status:   s,
-		Tags: report.GetTags(),
+		Tags:     report.GetTags(),
 	}
 
-	res , err := r.Collection.InsertOne(context.Background() , model)
+	res, err := r.Collection.InsertOne(context.Background(), model)
 	if err != nil {
-		return nil , status.Errorf(
+		return nil, status.Errorf(
 			codes.Internal,
-			fmt.Sprintf("error while store report data into database: %v" , err),
+			fmt.Sprintf("error while store report data into database: %v", err),
 		)
 	}
-	rid , ok := res.InsertedID.(primitive.ObjectID)
+	rid, ok := res.InsertedID.(primitive.ObjectID)
 	if !ok {
 		return nil, status.Errorf(
 			codes.Internal,
@@ -46,11 +46,11 @@ func (r *ReportServer) CreateReport(ctx context.Context, req *reportpb.SensorRep
 	}
 	return &reportpb.SensorReportResponse{
 		Report: &reportpb.Report{
-			ID: rid.Hex(),
-			FaultId: report.GetFaultId(),
+			Id:       rid.Hex(),
+			FaultId:  report.GetFaultId(),
 			SensorId: report.GetSensorId(),
-			Status: report.GetStatus(),
-			Tags: report.GetTags(),
+			Status:   report.GetStatus(),
+			Tags:     report.GetTags(),
 		},
 	}, nil
 }
