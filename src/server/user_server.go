@@ -33,7 +33,7 @@ func (*UserServer) Login(ctx context.Context, req *userpb.LoginRequest) (*userpb
 		User: &userpb.User{
 			Id:       int32(user.ID),
 			FullName: user.FullName,
-			Phone:    user.FullName,
+			Phone:    user.Phone,
 		},
 	}, nil
 }
