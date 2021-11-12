@@ -220,7 +220,7 @@ func (r *ReportServer) GetUnCompletedReports(ctx context.Context, req *reportpb.
 				break
 			}
 		}
-		if hasUnCompletedCommand || len(result.Commands) == 0{
+		if hasUnCompletedCommand || len(result.Commands) == 0 {
 			var commands []*reportpb.Command = []*reportpb.Command{}
 			for _, v := range result.Commands {
 				commands = append(commands, &reportpb.Command{
@@ -391,7 +391,17 @@ func (r *ReportServer) DoReportCommand(ctx context.Context, req *reportpb.DoRepo
 		}
 	}
 
-	r.Collection.UpdateOne(context.Background(), bson.M{"_id": oid}, bson.D{{"$set" , bson.D{{"commands", newCommands}}}})
+	r.Collection.UpdateOne(context.Background(), bson.M{"_id": oid}, bson.D{{"$set", bson.D{{"commands", newCommands}}}})
+
+	logServer := NewLogServer()
+	logData := model.LogModel{
+		Operation: UpdateOperation,
+		ReportID:  oid.Hex(),
+		SensorID:  report.SensorID,
+		UserID:    report.UserID,
+		CreatedAt: primitive.DateTime(time.Now().Minute()),
+	}
+	logServer.Add(logData)
 
 	return &reportpb.DoReportCommandResponse{
 		Result: "دستور با موفقیت اجرا شد",
