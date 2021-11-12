@@ -7,6 +7,7 @@ import (
 	"esme_team/src/pbs/reportpb"
 	"esme_team/src/pbs/userpb"
 	"esme_team/src/server"
+	"fmt"
 	"log"
 	"net"
 
@@ -15,6 +16,7 @@ import (
 )
 
 func main() {
+	fmt.Println("Server is running...")
 	postgresdb.PostgresInit()
 	if err := postgresdb.DB.AutoMigrate(&model.UserModel{},&model.TokenModel{}); err != nil {
 		log.Fatalf("error while AutoMigrate : %v" , err)
