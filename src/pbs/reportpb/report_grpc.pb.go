@@ -19,13 +19,14 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ReportServiceClient interface {
 	// create new record perhaps by sensor or a person
+	// Errors: Internal
 	CreateReport(ctx context.Context, in *SensorReportRequest, opts ...grpc.CallOption) (*SensorReportResponse, error)
 	// get report information by id
 	GetReport(ctx context.Context, in *GetReportRequest, opts ...grpc.CallOption) (*GetReportResponse, error)
 	// get all uncompleted reports by server streaming technique
-	GetUnCompletedReports(ctx context.Context, in *GetUnCompletedReportsRequest, opts ...grpc.CallOption) (ReportService_GetUnCompletedReportsClient, error)
+	GetUnCompletedReports(ctx context.Context, in *GetUnCompletedReportsRequest, opts ...grpc.CallOption) (*GetUnCompletedReportsResponse, error)
 	// get all logs which are relevant to specified report with "id"
-	GetReportLogs(ctx context.Context, in *GetReportLogRequest, opts ...grpc.CallOption) (ReportService_GetReportLogsClient, error)
+	GetReportLogs(ctx context.Context, in *GetReportLogRequest, opts ...grpc.CallOption) (*GetReportLogResponse, error)
 }
 
 type reportServiceClient struct {
@@ -54,68 +55,22 @@ func (c *reportServiceClient) GetReport(ctx context.Context, in *GetReportReques
 	return out, nil
 }
 
-func (c *reportServiceClient) GetUnCompletedReports(ctx context.Context, in *GetUnCompletedReportsRequest, opts ...grpc.CallOption) (ReportService_GetUnCompletedReportsClient, error) {
-	stream, err := c.cc.NewStream(ctx, &ReportService_ServiceDesc.Streams[0], "/report.ReportService/GetUnCompletedReports", opts...)
+func (c *reportServiceClient) GetUnCompletedReports(ctx context.Context, in *GetUnCompletedReportsRequest, opts ...grpc.CallOption) (*GetUnCompletedReportsResponse, error) {
+	out := new(GetUnCompletedReportsResponse)
+	err := c.cc.Invoke(ctx, "/report.ReportService/GetUnCompletedReports", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &reportServiceGetUnCompletedReportsClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
+	return out, nil
 }
 
-type ReportService_GetUnCompletedReportsClient interface {
-	Recv() (*GetUnCompletedReportsResponse, error)
-	grpc.ClientStream
-}
-
-type reportServiceGetUnCompletedReportsClient struct {
-	grpc.ClientStream
-}
-
-func (x *reportServiceGetUnCompletedReportsClient) Recv() (*GetUnCompletedReportsResponse, error) {
-	m := new(GetUnCompletedReportsResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *reportServiceClient) GetReportLogs(ctx context.Context, in *GetReportLogRequest, opts ...grpc.CallOption) (ReportService_GetReportLogsClient, error) {
-	stream, err := c.cc.NewStream(ctx, &ReportService_ServiceDesc.Streams[1], "/report.ReportService/GetReportLogs", opts...)
+func (c *reportServiceClient) GetReportLogs(ctx context.Context, in *GetReportLogRequest, opts ...grpc.CallOption) (*GetReportLogResponse, error) {
+	out := new(GetReportLogResponse)
+	err := c.cc.Invoke(ctx, "/report.ReportService/GetReportLogs", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &reportServiceGetReportLogsClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type ReportService_GetReportLogsClient interface {
-	Recv() (*GetReportLogResponse, error)
-	grpc.ClientStream
-}
-
-type reportServiceGetReportLogsClient struct {
-	grpc.ClientStream
-}
-
-func (x *reportServiceGetReportLogsClient) Recv() (*GetReportLogResponse, error) {
-	m := new(GetReportLogResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
+	return out, nil
 }
 
 // ReportServiceServer is the server API for ReportService service.
@@ -123,13 +78,14 @@ func (x *reportServiceGetReportLogsClient) Recv() (*GetReportLogResponse, error)
 // for forward compatibility
 type ReportServiceServer interface {
 	// create new record perhaps by sensor or a person
+	// Errors: Internal
 	CreateReport(context.Context, *SensorReportRequest) (*SensorReportResponse, error)
 	// get report information by id
 	GetReport(context.Context, *GetReportRequest) (*GetReportResponse, error)
 	// get all uncompleted reports by server streaming technique
-	GetUnCompletedReports(*GetUnCompletedReportsRequest, ReportService_GetUnCompletedReportsServer) error
+	GetUnCompletedReports(context.Context, *GetUnCompletedReportsRequest) (*GetUnCompletedReportsResponse, error)
 	// get all logs which are relevant to specified report with "id"
-	GetReportLogs(*GetReportLogRequest, ReportService_GetReportLogsServer) error
+	GetReportLogs(context.Context, *GetReportLogRequest) (*GetReportLogResponse, error)
 	mustEmbedUnimplementedReportServiceServer()
 }
 
@@ -143,11 +99,11 @@ func (UnimplementedReportServiceServer) CreateReport(context.Context, *SensorRep
 func (UnimplementedReportServiceServer) GetReport(context.Context, *GetReportRequest) (*GetReportResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetReport not implemented")
 }
-func (UnimplementedReportServiceServer) GetUnCompletedReports(*GetUnCompletedReportsRequest, ReportService_GetUnCompletedReportsServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetUnCompletedReports not implemented")
+func (UnimplementedReportServiceServer) GetUnCompletedReports(context.Context, *GetUnCompletedReportsRequest) (*GetUnCompletedReportsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUnCompletedReports not implemented")
 }
-func (UnimplementedReportServiceServer) GetReportLogs(*GetReportLogRequest, ReportService_GetReportLogsServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetReportLogs not implemented")
+func (UnimplementedReportServiceServer) GetReportLogs(context.Context, *GetReportLogRequest) (*GetReportLogResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetReportLogs not implemented")
 }
 func (UnimplementedReportServiceServer) mustEmbedUnimplementedReportServiceServer() {}
 
@@ -198,46 +154,40 @@ func _ReportService_GetReport_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ReportService_GetUnCompletedReports_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(GetUnCompletedReportsRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
+func _ReportService_GetUnCompletedReports_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUnCompletedReportsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
 	}
-	return srv.(ReportServiceServer).GetUnCompletedReports(m, &reportServiceGetUnCompletedReportsServer{stream})
-}
-
-type ReportService_GetUnCompletedReportsServer interface {
-	Send(*GetUnCompletedReportsResponse) error
-	grpc.ServerStream
-}
-
-type reportServiceGetUnCompletedReportsServer struct {
-	grpc.ServerStream
-}
-
-func (x *reportServiceGetUnCompletedReportsServer) Send(m *GetUnCompletedReportsResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func _ReportService_GetReportLogs_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(GetReportLogRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
+	if interceptor == nil {
+		return srv.(ReportServiceServer).GetUnCompletedReports(ctx, in)
 	}
-	return srv.(ReportServiceServer).GetReportLogs(m, &reportServiceGetReportLogsServer{stream})
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/report.ReportService/GetUnCompletedReports",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReportServiceServer).GetUnCompletedReports(ctx, req.(*GetUnCompletedReportsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
-type ReportService_GetReportLogsServer interface {
-	Send(*GetReportLogResponse) error
-	grpc.ServerStream
-}
-
-type reportServiceGetReportLogsServer struct {
-	grpc.ServerStream
-}
-
-func (x *reportServiceGetReportLogsServer) Send(m *GetReportLogResponse) error {
-	return x.ServerStream.SendMsg(m)
+func _ReportService_GetReportLogs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetReportLogRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReportServiceServer).GetReportLogs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/report.ReportService/GetReportLogs",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReportServiceServer).GetReportLogs(ctx, req.(*GetReportLogRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 // ReportService_ServiceDesc is the grpc.ServiceDesc for ReportService service.
@@ -255,18 +205,15 @@ var ReportService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "GetReport",
 			Handler:    _ReportService_GetReport_Handler,
 		},
-	},
-	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "GetUnCompletedReports",
-			Handler:       _ReportService_GetUnCompletedReports_Handler,
-			ServerStreams: true,
+			MethodName: "GetUnCompletedReports",
+			Handler:    _ReportService_GetUnCompletedReports_Handler,
 		},
 		{
-			StreamName:    "GetReportLogs",
-			Handler:       _ReportService_GetReportLogs_Handler,
-			ServerStreams: true,
+			MethodName: "GetReportLogs",
+			Handler:    _ReportService_GetReportLogs_Handler,
 		},
 	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "src/pbs/reportpb/report.proto",
 }

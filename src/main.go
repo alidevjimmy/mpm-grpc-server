@@ -18,7 +18,7 @@ import (
 func main() {
 	fmt.Println("Server is running...")
 	postgresdb.PostgresInit()
-	if err := postgresdb.DB.AutoMigrate(&model.UserModel{},&model.TokenModel{}); err != nil {
+	if err := postgresdb.DB.AutoMigrate(&model.UserModel{},&model.TokenModel{} ,&model.CommandModel{}, &model.FaultModel{} ); err != nil {
 		log.Fatalf("error while AutoMigrate : %v" , err)
 	}
 	mongodb.Connect()

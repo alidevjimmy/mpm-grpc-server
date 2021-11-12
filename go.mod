@@ -10,6 +10,7 @@ require (
 )
 
 require (
+	github.com/appleboy/go-fcm v0.1.5 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
 	github.com/fatih/color v1.12.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect

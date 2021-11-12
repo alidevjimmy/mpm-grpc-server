@@ -13,13 +13,14 @@ service ReportService {
     // get report information by id
     rpc GetReport (GetReportRequest) returns (GetReportResponse) {} ;
     // get all uncompleted reports by server streaming technique
-    rpc GetUnCompletedReports (GetUnCompletedReportsRequest) returns (stream GetUnCompletedReportsResponse) {} ;
+    rpc GetUnCompletedReports (GetUnCompletedReportsRequest) returns (GetUnCompletedReportsResponse) {} ;
     // get all logs which are relevant to specified report with "id"
-    rpc GetReportLogs (GetReportLogRequest) returns (stream GetReportLogResponse) {};
+    rpc GetReportLogs (GetReportLogRequest) returns (GetReportLogResponse) {};
 
     // rpc AllGetLogs
     // rpc sensor logs
 }
+
 
 message Report {
     string id = 1;
@@ -34,13 +35,34 @@ message Report {
     // if not specified => field will be LOW (1)
     Status status = 4;
     repeated string tags = 5;
+    // if sensor is creator of the report then user_id will be 0
+    // otherwise user_id has value
+    int32 user_id = 6;
+    // these feilds are not needed for requests
+    string created_at = 7; 
+    string updated_at = 8;
+    repeated Command commands = 9;
+    
 }
 
 message ReportLog {
-    string title = 1;
+    // CREATE, UPDATE, DELETE
+    string operation = 1;
     int32 user_id = 2;
-    int32 report_id = 3;
-    string description = 4;
+    string report_id = 3;
+    int32 sendsor_id = 4;
+    string description = 5;
+    // not needed for requests
+    string created_at = 6; 
+}
+
+message Command {
+    int32 command_id = 1;
+    // FIRE, ELECTICY, ...
+    string title = 2;
+    // is manual or auto  
+    bool Auto = 3;
+    bool Done = 4;
 }
 
 message SensorReportRequest {
@@ -64,7 +86,7 @@ message GetUnCompletedReportsRequest {
 }
 
 message GetUnCompletedReportsResponse {
-    Report report = 1;
+    repeated Report report = 1;
 }
 
 message GetReportLogRequest {
@@ -72,5 +94,5 @@ message GetReportLogRequest {
 }
 
 message GetReportLogResponse {
-    ReportLog report_log = 1;
+    repeated ReportLog report_log = 1;
 }

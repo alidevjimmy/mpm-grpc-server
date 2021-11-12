@@ -9,7 +9,8 @@ service UserService {
     // Errors: Internal , NotFound
     rpc Login(LoginRequest) returns (LoginResponse) {};
     // get all logs which are relevant to specified user with "id"
-    rpc GetUserLogs (GetUserLogsRequest) returns (stream GetUserLogsResponse) {};
+    // Errors: NotFound
+    rpc GetUserLogs (GetUserLogsRequest) returns (GetUserLogsResponse) {};
     // Errors: Internal
     rpc StoreNewToken(StoreNewTokenRequest) returns (StoreNewTokenResponse) {}; 
 }
