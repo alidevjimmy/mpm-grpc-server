@@ -18,9 +18,10 @@ import (
 func main() {
 	fmt.Println("Server is running...")
 	postgresdb.PostgresInit()
-	if err := postgresdb.DB.AutoMigrate(&model.UserModel{},&model.TokenModel{} ,&model.CommandModel{}, &model.FaultModel{} ); err != nil {
-		log.Fatalf("error while AutoMigrate : %v" , err)
+	if err := postgresdb.DB.AutoMigrate(&model.UserModel{}, &model.TokenModel{}, &model.CommandModel{}, &model.FaultModel{}); err != nil {
+		log.Fatalf("error while AutoMigrate : %v", err)
 	}
+
 	mongodb.Connect()
 
 	lis, err := net.Listen("tcp", "0.0.0.0:50051")
@@ -40,8 +41,8 @@ func main() {
 }
 
 func serviceRegistry(s *grpc.Server) {
-	reportpb.RegisterReportServiceServer(s , &server.ReportServer{
+	reportpb.RegisterReportServiceServer(s, &server.ReportServer{
 		Collection: mongodb.MongoClient.Database("server_db").Collection("reports"),
 	})
-	userpb.RegisterUserServiceServer(s , &server.UserServer{})
+	userpb.RegisterUserServiceServer(s, &server.UserServer{})
 }

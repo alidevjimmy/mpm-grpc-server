@@ -38,9 +38,6 @@ func (*UserServer) Login(ctx context.Context, req *userpb.LoginRequest) (*userpb
 	}, nil
 }
 
-func (*UserServer) GetUserLogs(req *userpb.GetUserLogsRequest, stream userpb.UserService_GetUserLogsServer) error {
-	return nil
-}
 
 func (*UserServer) StoreNewToken(ctx context.Context, req *userpb.StoreNewTokenRequest) (*userpb.StoreNewTokenResponse, error) {
 	model := &model.TokenModel{

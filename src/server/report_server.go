@@ -50,12 +50,12 @@ func (r *ReportServer) CreateReport(ctx context.Context, req *reportpb.SensorRep
 	var commands []model.CommandReportModel = []model.CommandReportModel{}
 	var resCommands []*reportpb.Command = []*reportpb.Command{}
 	for _, v := range fault.Commands {
-		// commands = append(commands, model.CommandReportModel{
-		// 	CommandID: int(v.ID),
-		// 	Title:     v.Title,
-		// 	Auto:      v.Auto,
-		// 	Done:      false,
-		// })
+		commands = append(commands, model.CommandReportModel{
+			CommandID: int(v.ID),
+			Title:     v.Title,
+			Auto:      v.Auto,
+			Done:      false,
+		})
 		resCommands = append(resCommands, &reportpb.Command{
 			CommandId: int32(v.ID),
 			Title:     v.Title,
@@ -117,7 +117,6 @@ func (r *ReportServer) CreateReport(ctx context.Context, req *reportpb.SensorRep
 	} else if s == 3 {
 		proiarity = "بالا"
 	}
-	fmt.Println(proiarity)
 	for _, v := range tokens {
 		msg := fcm.Message{
 			To: v.Token,
@@ -196,26 +195,55 @@ func (r *ReportServer) GetReport(ctx context.Context, req *reportpb.GetReportReq
 }
 
 func (r *ReportServer) GetUnCompletedReports(ctx context.Context, req *reportpb.GetUnCompletedReportsRequest) (*reportpb.GetUnCompletedReportsResponse, error) {
-	// cur, err := r.Collection.Find(context.Background(), bson.M{"_id": oid})
-	// if err != nil {
-	// 	return nil, status.Errorf(
-	// 		codes.Internal,
-	// 		fmt.Sprintf("Error while fetch data: %v", err),
-	// 	)
-	// }
-	// defer cur.Close(context.Background())
-	// for cur.Next(context.Background()) {
-	// 	var result bson.D
-	// 	err := cur.Decode(result)
-	// 	if err != nil {
-	// 		return nil, status.Errorf(
-	// 			codes.Internal,
-	// 			fmt.Sprintf("Error while fetch data: %v", err),
-	// 		)
-	// 	}
-	// }
-	// retur
-	return nil, nil
+	cur, err := r.Collection.Find(context.Background(), bson.M{})
+	if err != nil {
+		return nil, status.Errorf(
+			codes.Internal,
+			fmt.Sprintf("Error while fetch data: %v", err),
+		)
+	}
+	defer cur.Close(context.Background())
+	var reports []*reportpb.Report = []*reportpb.Report{}
+	for cur.Next(context.Background()) {
+		var result model.ReportModel
+		err := cur.Decode(&result)
+		if err != nil {
+			return nil, status.Errorf(
+				codes.Internal,
+				fmt.Sprintf("Error while fetch data: %v", err),
+			)
+		}
+		hasUnCompletedCommand := false
+		for _, v := range result.Commands {
+			if !v.Done {
+				hasUnCompletedCommand = true
+				break
+			}
+		}
+		if hasUnCompletedCommand {
+			var commands []*reportpb.Command = []*reportpb.Command{}
+			for _, v := range result.Commands {
+				commands = append(commands, &reportpb.Command{
+					CommandId: int32(v.CommandID),
+					Title:     v.Title,
+					Auto:      v.Auto,
+					Done:      v.Done,
+				})
+			}
+			reports = append(reports, &reportpb.Report{
+				Id:       result.ID.Hex(),
+				FaultId:  int32(result.FaultID),
+				SensorId: int32(result.SensorID),
+				Status:   reportpb.Report_Status(result.Status),
+				Tags:     result.Tags,
+				UserId:   int32(result.UserID),
+				Commands: commands,
+			})
+		}
+	}
+	return &reportpb.GetUnCompletedReportsResponse{
+		Report: reports,
+	}, nil
 }
 
 func (r *ReportServer) GetReportLogs(ctx context.Context, req *reportpb.GetReportLogRequest) (*reportpb.GetReportLogResponse, error) {

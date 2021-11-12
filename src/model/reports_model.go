@@ -17,6 +17,6 @@ type ReportModel struct {
 type CommandReportModel struct {
 	CommandID int    `bson:"command_id"`
 	Title     string `bson:"title"`
-	Auto      bool   `bson:"title"`
+	Auto      bool   `bson:"auto"`
 	Done      bool   `bson:"done"`
 }
