@@ -18,9 +18,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
+	// Errors: Internal , NotFound
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
-	// get all logs which are relevant to specified user with "id"
-	GetUserLogs(ctx context.Context, in *GetUserLogsRequest, opts ...grpc.CallOption) (UserService_GetUserLogsClient, error)
+	// Errors: Internal
 	StoreNewToken(ctx context.Context, in *StoreNewTokenRequest, opts ...grpc.CallOption) (*StoreNewTokenResponse, error)
 }
 
@@ -41,38 +41,6 @@ func (c *userServiceClient) Login(ctx context.Context, in *LoginRequest, opts ..
 	return out, nil
 }
 
-func (c *userServiceClient) GetUserLogs(ctx context.Context, in *GetUserLogsRequest, opts ...grpc.CallOption) (UserService_GetUserLogsClient, error) {
-	stream, err := c.cc.NewStream(ctx, &UserService_ServiceDesc.Streams[0], "/user.UserService/GetUserLogs", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &userServiceGetUserLogsClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type UserService_GetUserLogsClient interface {
-	Recv() (*GetUserLogsResponse, error)
-	grpc.ClientStream
-}
-
-type userServiceGetUserLogsClient struct {
-	grpc.ClientStream
-}
-
-func (x *userServiceGetUserLogsClient) Recv() (*GetUserLogsResponse, error) {
-	m := new(GetUserLogsResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
 func (c *userServiceClient) StoreNewToken(ctx context.Context, in *StoreNewTokenRequest, opts ...grpc.CallOption) (*StoreNewTokenResponse, error) {
 	out := new(StoreNewTokenResponse)
 	err := c.cc.Invoke(ctx, "/user.UserService/StoreNewToken", in, out, opts...)
@@ -86,9 +54,9 @@ func (c *userServiceClient) StoreNewToken(ctx context.Context, in *StoreNewToken
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
+	// Errors: Internal , NotFound
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
-	// get all logs which are relevant to specified user with "id"
-	GetUserLogs(*GetUserLogsRequest, UserService_GetUserLogsServer) error
+	// Errors: Internal
 	StoreNewToken(context.Context, *StoreNewTokenRequest) (*StoreNewTokenResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
@@ -99,9 +67,6 @@ type UnimplementedUserServiceServer struct {
 
 func (UnimplementedUserServiceServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
-}
-func (UnimplementedUserServiceServer) GetUserLogs(*GetUserLogsRequest, UserService_GetUserLogsServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetUserLogs not implemented")
 }
 func (UnimplementedUserServiceServer) StoreNewToken(context.Context, *StoreNewTokenRequest) (*StoreNewTokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StoreNewToken not implemented")
@@ -135,27 +100,6 @@ func _UserService_Login_Handler(srv interface{}, ctx context.Context, dec func(i
 		return srv.(UserServiceServer).Login(ctx, req.(*LoginRequest))
 	}
 	return interceptor(ctx, in, info, handler)
-}
-
-func _UserService_GetUserLogs_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(GetUserLogsRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(UserServiceServer).GetUserLogs(m, &userServiceGetUserLogsServer{stream})
-}
-
-type UserService_GetUserLogsServer interface {
-	Send(*GetUserLogsResponse) error
-	grpc.ServerStream
-}
-
-type userServiceGetUserLogsServer struct {
-	grpc.ServerStream
-}
-
-func (x *userServiceGetUserLogsServer) Send(m *GetUserLogsResponse) error {
-	return x.ServerStream.SendMsg(m)
 }
 
 func _UserService_StoreNewToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -192,12 +136,6 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_StoreNewToken_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "GetUserLogs",
-			Handler:       _UserService_GetUserLogs_Handler,
-			ServerStreams: true,
-		},
-	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "src/pbs/userpb/user.proto",
 }

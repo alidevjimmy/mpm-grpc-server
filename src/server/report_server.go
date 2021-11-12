@@ -69,8 +69,8 @@ func (r *ReportServer) CreateReport(ctx context.Context, req *reportpb.SensorRep
 		SensorID:  int(report.GetSensorId()),
 		Status:    s,
 		Tags:      report.GetTags(),
-		CreatedAt: primitive.DateTime(time.Now().Day()),
-		UpdatedAt: primitive.DateTime(time.Now().Day()),
+		CreatedAt: primitive.DateTime(time.Now().Minute()),
+		UpdatedAt: primitive.DateTime(time.Now().Minute()),
 		UserID:    int(report.GetUserId()),
 		Commands:  commands,
 	}
@@ -98,7 +98,7 @@ func (r *ReportServer) CreateReport(ctx context.Context, req *reportpb.SensorRep
 		ReportID:  rid.Hex(),
 		SensorID:  int(report.GetSensorId()),
 		UserID:    int(report.GetUserId()),
-		CreatedAt: primitive.DateTime(time.Now().Day()),
+		CreatedAt: primitive.DateTime(time.Now().Minute()),
 	}
 	logServer.Add(logData)
 
@@ -220,7 +220,7 @@ func (r *ReportServer) GetUnCompletedReports(ctx context.Context, req *reportpb.
 				break
 			}
 		}
-		if hasUnCompletedCommand {
+		if hasUnCompletedCommand || len(result.Commands) == 0{
 			var commands []*reportpb.Command = []*reportpb.Command{}
 			for _, v := range result.Commands {
 				commands = append(commands, &reportpb.Command{
@@ -299,4 +299,101 @@ func SendNotif(msg fcm.Message) error {
 		return err
 	}
 	return nil
+}
+
+func (r *ReportServer) GetAllLogs(ctx context.Context, req *reportpb.GetAllLogsRequest) (*reportpb.GetAllLogsResponse, error) {
+	cur, err := mongodb.MongoClient.Database("server_db").Collection("logs").Find(context.Background(), bson.M{})
+	if err != nil {
+		return nil, status.Errorf(
+			codes.Internal,
+			fmt.Sprintf("Error while fetch data: %v", err),
+		)
+	}
+	defer cur.Close(context.Background())
+	var logs []*reportpb.ReportLog = []*reportpb.ReportLog{}
+	for cur.Next(context.Background()) {
+		var result model.LogModel
+		err := cur.Decode(&result)
+		if err != nil {
+			return nil, status.Errorf(
+				codes.Internal,
+				fmt.Sprintf("Error while fetch data: %v", err),
+			)
+		}
+
+		logs = append(logs, &reportpb.ReportLog{
+			Operation:   result.Operation,
+			UserId:      int32(result.UserID),
+			ReportId:    result.ReportID,
+			SendsorId:   int32(result.SensorID),
+			Description: result.Description,
+			CreatedAt:   result.CreatedAt.Time().String(),
+		})
+
+	}
+	return &reportpb.GetAllLogsResponse{
+		ReportLog: logs,
+	}, nil
+}
+
+func (r *ReportServer) DoReportCommand(ctx context.Context, req *reportpb.DoReportCommandRequest) (*reportpb.DoReportCommandResponse, error) {
+	oid, err := primitive.ObjectIDFromHex(req.GetReportId())
+	if err != nil {
+		return nil, status.Errorf(
+			codes.Internal,
+			fmt.Sprintf("Error while get OID: %v", err),
+		)
+	}
+	var report model.ReportModel
+	if err := r.Collection.FindOne(context.Background(), bson.M{"_id": oid}).Decode(&report); err != nil {
+		return nil, status.Errorf(
+			codes.Internal,
+			fmt.Sprintf("Error while fetch data: %v", err),
+		)
+	}
+	if report.FaultID == 0 {
+		return nil, status.Errorf(
+			codes.NotFound,
+			fmt.Sprintf("گزارش یافت نشد"),
+		)
+	}
+	commandExists := false
+	var ci int
+	for k, v := range report.Commands {
+		if v.CommandID == int(req.GetCommandId()) {
+			commandExists = true
+			ci = k
+			break
+		}
+	}
+	if !commandExists {
+		return nil, status.Errorf(
+			codes.NotFound,
+			fmt.Sprintf("دستور برای گزارش یافت نشد"),
+		)
+	}
+	var newCommands []model.CommandReportModel = []model.CommandReportModel{}
+	for k, v := range report.Commands {
+		if k == ci {
+			newCommands = append(newCommands, model.CommandReportModel{
+				CommandID: v.CommandID,
+				Title:     v.Title,
+				Auto:      v.Auto,
+				Done:      true,
+			})
+		} else {
+			newCommands = append(newCommands, model.CommandReportModel{
+				CommandID: v.CommandID,
+				Title:     v.Title,
+				Auto:      v.Auto,
+				Done:      v.Done,
+			})
+		}
+	}
+
+	r.Collection.UpdateOne(context.Background(), bson.M{"_id": oid}, bson.D{{"$set" , bson.D{{"commands", newCommands}}}})
+
+	return &reportpb.DoReportCommandResponse{
+		Result: "دستور با موفقیت اجرا شد",
+	}, nil
 }

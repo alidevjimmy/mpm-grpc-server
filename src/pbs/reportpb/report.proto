@@ -16,9 +16,10 @@ service ReportService {
     rpc GetUnCompletedReports (GetUnCompletedReportsRequest) returns (GetUnCompletedReportsResponse) {} ;
     // get all logs which are relevant to specified report with "id"
     rpc GetReportLogs (GetReportLogRequest) returns (GetReportLogResponse) {};
-
-    // rpc AllGetLogs
-    // rpc sensor logs
+    // Errors: Internal
+    rpc GetAllLogs (GetAllLogsRequest) returns (GetAllLogsResponse) {};
+    // Errors: NotFound, Internal
+    rpc DoReportCommand(DoReportCommandRequest) returns (DoReportCommandResponse) {};
 }
 
 
@@ -95,4 +96,20 @@ message GetReportLogRequest {
 
 message GetReportLogResponse {
     repeated ReportLog report_log = 1;
+}
+
+message GetAllLogsRequest {
+
+}
+message GetAllLogsResponse {
+    repeated ReportLog report_log = 1;
+}
+
+message DoReportCommandRequest {
+    string report_id = 1;
+    int32 command_id = 2;
+}
+
+message DoReportCommandResponse {
+    string result = 1;
 }

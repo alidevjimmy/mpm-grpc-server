@@ -27,6 +27,8 @@ type ReportServiceClient interface {
 	GetUnCompletedReports(ctx context.Context, in *GetUnCompletedReportsRequest, opts ...grpc.CallOption) (*GetUnCompletedReportsResponse, error)
 	// get all logs which are relevant to specified report with "id"
 	GetReportLogs(ctx context.Context, in *GetReportLogRequest, opts ...grpc.CallOption) (*GetReportLogResponse, error)
+	GetAllLogs(ctx context.Context, in *GetAllLogsRequest, opts ...grpc.CallOption) (*GetAllLogsResponse, error)
+	DoReportCommand(ctx context.Context, in *DoReportCommandRequest, opts ...grpc.CallOption) (*DoReportCommandResponse, error)
 }
 
 type reportServiceClient struct {
@@ -73,6 +75,24 @@ func (c *reportServiceClient) GetReportLogs(ctx context.Context, in *GetReportLo
 	return out, nil
 }
 
+func (c *reportServiceClient) GetAllLogs(ctx context.Context, in *GetAllLogsRequest, opts ...grpc.CallOption) (*GetAllLogsResponse, error) {
+	out := new(GetAllLogsResponse)
+	err := c.cc.Invoke(ctx, "/report.ReportService/GetAllLogs", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *reportServiceClient) DoReportCommand(ctx context.Context, in *DoReportCommandRequest, opts ...grpc.CallOption) (*DoReportCommandResponse, error) {
+	out := new(DoReportCommandResponse)
+	err := c.cc.Invoke(ctx, "/report.ReportService/DoReportCommand", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ReportServiceServer is the server API for ReportService service.
 // All implementations must embed UnimplementedReportServiceServer
 // for forward compatibility
@@ -86,6 +106,8 @@ type ReportServiceServer interface {
 	GetUnCompletedReports(context.Context, *GetUnCompletedReportsRequest) (*GetUnCompletedReportsResponse, error)
 	// get all logs which are relevant to specified report with "id"
 	GetReportLogs(context.Context, *GetReportLogRequest) (*GetReportLogResponse, error)
+	GetAllLogs(context.Context, *GetAllLogsRequest) (*GetAllLogsResponse, error)
+	DoReportCommand(context.Context, *DoReportCommandRequest) (*DoReportCommandResponse, error)
 	mustEmbedUnimplementedReportServiceServer()
 }
 
@@ -104,6 +126,12 @@ func (UnimplementedReportServiceServer) GetUnCompletedReports(context.Context, *
 }
 func (UnimplementedReportServiceServer) GetReportLogs(context.Context, *GetReportLogRequest) (*GetReportLogResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetReportLogs not implemented")
+}
+func (UnimplementedReportServiceServer) GetAllLogs(context.Context, *GetAllLogsRequest) (*GetAllLogsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllLogs not implemented")
+}
+func (UnimplementedReportServiceServer) DoReportCommand(context.Context, *DoReportCommandRequest) (*DoReportCommandResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DoReportCommand not implemented")
 }
 func (UnimplementedReportServiceServer) mustEmbedUnimplementedReportServiceServer() {}
 
@@ -190,6 +218,42 @@ func _ReportService_GetReportLogs_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ReportService_GetAllLogs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllLogsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReportServiceServer).GetAllLogs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/report.ReportService/GetAllLogs",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReportServiceServer).GetAllLogs(ctx, req.(*GetAllLogsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ReportService_DoReportCommand_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DoReportCommandRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReportServiceServer).DoReportCommand(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/report.ReportService/DoReportCommand",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReportServiceServer).DoReportCommand(ctx, req.(*DoReportCommandRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ReportService_ServiceDesc is the grpc.ServiceDesc for ReportService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -212,6 +276,14 @@ var ReportService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetReportLogs",
 			Handler:    _ReportService_GetReportLogs_Handler,
+		},
+		{
+			MethodName: "GetAllLogs",
+			Handler:    _ReportService_GetAllLogs_Handler,
+		},
+		{
+			MethodName: "DoReportCommand",
+			Handler:    _ReportService_DoReportCommand_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
