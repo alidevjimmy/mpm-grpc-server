@@ -461,4 +461,46 @@ func (r *ReportServer) GetSensorReports(ctx context.Context, req *reportpb.GetSe
 	}, nil
 }
 
-// func (r *ReportServer) GetSensorsReportsCount(context.Context, *reportpb.GetSensorsReportsCountRequest) (*reportpb.GetSensorsReportsCountResponse, error)
+func (r *ReportServer) GetSensorsReportsCount(ctx context.Context, req *reportpb.GetSensorsReportsCountRequest) (*reportpb.GetSensorsReportsCountResponse, error) {
+	// id -> counter
+	counter := map[int]int{}
+	cur, err := r.Collection.Find(context.Background(), bson.M{})
+	if err != nil {
+		return nil, status.Errorf(
+			codes.Internal,
+			fmt.Sprintf("Error while fetch data: %v", err),
+		)
+	}
+	defer cur.Close(context.Background())
+	for cur.Next(context.Background()) {
+		var result model.ReportModel
+		err := cur.Decode(&result)
+		if err != nil {
+			return nil, status.Errorf(
+				codes.Internal,
+				fmt.Sprintf("Error while fetch data: %v", err),
+			)
+		}
+		hasUnCompletedCommand := false
+		for _, v := range result.Commands {
+			if !v.Done {
+				hasUnCompletedCommand = true
+				break
+			}
+		}
+		if hasUnCompletedCommand || len(result.Commands) == 0 {
+			counter[int(result.SensorID)]++
+		}
+	}
+	var resArr []*reportpb.GetSensorsReportsCountResponse_SensorIdWithReportCount = []*reportpb.GetSensorsReportsCountResponse_SensorIdWithReportCount{}
+	for k, v := range counter {
+		resArr = append(resArr, &reportpb.GetSensorsReportsCountResponse_SensorIdWithReportCount{
+			SensorId: int32(k),
+			Count:    int32(v),
+		})
+	}
+
+	return &reportpb.GetSensorsReportsCountResponse{
+		SensorIdWithReportCount: resArr,
+	}, nil
+}

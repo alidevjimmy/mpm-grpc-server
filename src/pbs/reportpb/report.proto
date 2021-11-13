@@ -127,7 +127,7 @@ message GetSensorReportsResponse {
 }
 
 message GetSensorsReportsCountRequest {
-    int32 sensor_id = 1;
+    
 }
 
 message GetSensorsReportsCountResponse {
