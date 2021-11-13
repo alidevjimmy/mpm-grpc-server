@@ -10,13 +10,23 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"path"
+	"path/filepath"
+	"runtime"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
+func RootDir() string {
+	_, b, _, _ := runtime.Caller(0)
+	d := path.Join(path.Dir(b))
+	return filepath.Dir(d)
+}
+
 func main() {
 	fmt.Println("Server is running...")
+
 	postgresdb.PostgresInit()
 	if err := postgresdb.DB.AutoMigrate(&model.UserModel{}, &model.TokenModel{}, &model.CommandModel{}, &model.FaultModel{}); err != nil {
 		log.Fatalf("error while AutoMigrate : %v", err)

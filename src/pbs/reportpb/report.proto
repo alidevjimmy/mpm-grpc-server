@@ -20,6 +20,7 @@ service ReportService {
     rpc GetAllLogs (GetAllLogsRequest) returns (GetAllLogsResponse) {};
     // Errors: NotFound, Internal
     rpc DoReportCommand(DoReportCommandRequest) returns (DoReportCommandResponse) {};
+    rpc GetSensorReports(GetSensorReportsRequest) returns (GetSensorReportsResponse) {};
 }
 
 
@@ -112,4 +113,12 @@ message DoReportCommandRequest {
 
 message DoReportCommandResponse {
     string result = 1;
+}
+
+message GetSensorReportsRequest {
+    int32 sensor_id = 1;
+}
+
+message GetSensorReportsResponse {
+    repeated Report reports = 1;
 }

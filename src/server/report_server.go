@@ -64,6 +64,7 @@ func (r *ReportServer) CreateReport(ctx context.Context, req *reportpb.SensorRep
 		})
 
 	}
+
 	reportData := model.ReportModel{
 		FaultID:   int(report.GetFaultId()),
 		SensorID:  int(report.GetSensorId()),
@@ -124,8 +125,8 @@ func (r *ReportServer) CreateReport(ctx context.Context, req *reportpb.SensorRep
 				"report_id": rid,
 			},
 			Notification: &fcm.Notification{
-				Title: "هشدار جدید",
-				Body:  fmt.Sprintf("گزارش %v با سطح اولویت %v ثبت شده است", reportData.SensorID, proiarity),
+				Title: fault.Title,
+				Body:  fmt.Sprintf("اهمیت: %v\nآدرس: %v", "ساختمان صالی، تابلو برق طبقه اول", proiarity),
 				Color: "#df4759",
 			},
 		}
@@ -405,5 +406,57 @@ func (r *ReportServer) DoReportCommand(ctx context.Context, req *reportpb.DoRepo
 
 	return &reportpb.DoReportCommandResponse{
 		Result: "دستور با موفقیت اجرا شد",
+	}, nil
+}
+
+func (r *ReportServer) GetSensorReports(ctx context.Context, req *reportpb.GetSensorReportsRequest) (*reportpb.GetSensorReportsResponse, error) {
+	cur, err := r.Collection.Find(context.Background(), bson.M{})
+	if err != nil {
+		return nil, status.Errorf(
+			codes.Internal,
+			fmt.Sprintf("Error while fetch data: %v", err),
+		)
+	}
+	defer cur.Close(context.Background())
+	var reports []*reportpb.Report = []*reportpb.Report{}
+	for cur.Next(context.Background()) {
+		var result model.ReportModel
+		err := cur.Decode(&result)
+		if err != nil {
+			return nil, status.Errorf(
+				codes.Internal,
+				fmt.Sprintf("Error while fetch data: %v", err),
+			)
+		}
+		hasUnCompletedCommand := false
+		for _, v := range result.Commands {
+			if !v.Done {
+				hasUnCompletedCommand = true
+				break
+			}
+		}
+		if (hasUnCompletedCommand || len(result.Commands) == 0) && result.SensorID == int(req.GetSensorId()) {
+			var commands []*reportpb.Command = []*reportpb.Command{}
+			for _, v := range result.Commands {
+				commands = append(commands, &reportpb.Command{
+					CommandId: int32(v.CommandID),
+					Title:     v.Title,
+					Auto:      v.Auto,
+					Done:      v.Done,
+				})
+			}
+			reports = append(reports, &reportpb.Report{
+				Id:       result.ID.Hex(),
+				FaultId:  int32(result.FaultID),
+				SensorId: int32(result.SensorID),
+				Status:   reportpb.Report_Status(result.Status),
+				Tags:     result.Tags,
+				UserId:   int32(result.UserID),
+				Commands: commands,
+			})
+		}
+	}
+	return &reportpb.GetSensorReportsResponse{
+		Reports: reports,
 	}, nil
 }

@@ -27,8 +27,11 @@ type ReportServiceClient interface {
 	GetUnCompletedReports(ctx context.Context, in *GetUnCompletedReportsRequest, opts ...grpc.CallOption) (*GetUnCompletedReportsResponse, error)
 	// get all logs which are relevant to specified report with "id"
 	GetReportLogs(ctx context.Context, in *GetReportLogRequest, opts ...grpc.CallOption) (*GetReportLogResponse, error)
+	// Errors: Internal
 	GetAllLogs(ctx context.Context, in *GetAllLogsRequest, opts ...grpc.CallOption) (*GetAllLogsResponse, error)
+	// Errors: NotFound, Internal
 	DoReportCommand(ctx context.Context, in *DoReportCommandRequest, opts ...grpc.CallOption) (*DoReportCommandResponse, error)
+	GetSensorReports(ctx context.Context, in *GetSensorReportsRequest, opts ...grpc.CallOption) (*GetSensorReportsResponse, error)
 }
 
 type reportServiceClient struct {
@@ -93,6 +96,15 @@ func (c *reportServiceClient) DoReportCommand(ctx context.Context, in *DoReportC
 	return out, nil
 }
 
+func (c *reportServiceClient) GetSensorReports(ctx context.Context, in *GetSensorReportsRequest, opts ...grpc.CallOption) (*GetSensorReportsResponse, error) {
+	out := new(GetSensorReportsResponse)
+	err := c.cc.Invoke(ctx, "/report.ReportService/GetSensorReports", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ReportServiceServer is the server API for ReportService service.
 // All implementations must embed UnimplementedReportServiceServer
 // for forward compatibility
@@ -106,8 +118,11 @@ type ReportServiceServer interface {
 	GetUnCompletedReports(context.Context, *GetUnCompletedReportsRequest) (*GetUnCompletedReportsResponse, error)
 	// get all logs which are relevant to specified report with "id"
 	GetReportLogs(context.Context, *GetReportLogRequest) (*GetReportLogResponse, error)
+	// Errors: Internal
 	GetAllLogs(context.Context, *GetAllLogsRequest) (*GetAllLogsResponse, error)
+	// Errors: NotFound, Internal
 	DoReportCommand(context.Context, *DoReportCommandRequest) (*DoReportCommandResponse, error)
+	GetSensorReports(context.Context, *GetSensorReportsRequest) (*GetSensorReportsResponse, error)
 	mustEmbedUnimplementedReportServiceServer()
 }
 
@@ -132,6 +147,9 @@ func (UnimplementedReportServiceServer) GetAllLogs(context.Context, *GetAllLogsR
 }
 func (UnimplementedReportServiceServer) DoReportCommand(context.Context, *DoReportCommandRequest) (*DoReportCommandResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DoReportCommand not implemented")
+}
+func (UnimplementedReportServiceServer) GetSensorReports(context.Context, *GetSensorReportsRequest) (*GetSensorReportsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSensorReports not implemented")
 }
 func (UnimplementedReportServiceServer) mustEmbedUnimplementedReportServiceServer() {}
 
@@ -254,6 +272,24 @@ func _ReportService_DoReportCommand_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ReportService_GetSensorReports_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSensorReportsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReportServiceServer).GetSensorReports(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/report.ReportService/GetSensorReports",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReportServiceServer).GetSensorReports(ctx, req.(*GetSensorReportsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ReportService_ServiceDesc is the grpc.ServiceDesc for ReportService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -284,6 +320,10 @@ var ReportService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DoReportCommand",
 			Handler:    _ReportService_DoReportCommand_Handler,
+		},
+		{
+			MethodName: "GetSensorReports",
+			Handler:    _ReportService_GetSensorReports_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

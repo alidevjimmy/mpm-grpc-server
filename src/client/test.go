@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	cc, err := grpc.Dial("185.235.43.194:50051", grpc.WithInsecure())
+	cc, err := grpc.Dial("37.152.180.252:50051", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Failed to connect: %v", err)
 	}
@@ -17,8 +17,8 @@ func main() {
 	// Create CLient
 	c := userpb.NewUserServiceClient(cc)
 	request := &userpb.LoginRequest{
-		Phone:    "09384720059",
-		Password: "password",
+		Phone:    "1",
+		Password: "1",
 	}
 	gResponse, err := c.Login(context.Background(), request)
 	if err != nil {
