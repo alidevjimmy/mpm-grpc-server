@@ -460,3 +460,5 @@ func (r *ReportServer) GetSensorReports(ctx context.Context, req *reportpb.GetSe
 		Reports: reports,
 	}, nil
 }
+
+// func (r *ReportServer) GetSensorsReportsCount(context.Context, *reportpb.GetSensorsReportsCountRequest) (*reportpb.GetSensorsReportsCountResponse, error)

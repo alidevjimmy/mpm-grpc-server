@@ -40,7 +40,7 @@ services:
     #   ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
     #   ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongo:27017/
     networks:
-      - mongonet
+      - mongonetz
     volumes:
       - mongoexpressdata:/var/lib/postgresql/data
     depends_on:

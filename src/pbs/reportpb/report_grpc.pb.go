@@ -32,6 +32,7 @@ type ReportServiceClient interface {
 	// Errors: NotFound, Internal
 	DoReportCommand(ctx context.Context, in *DoReportCommandRequest, opts ...grpc.CallOption) (*DoReportCommandResponse, error)
 	GetSensorReports(ctx context.Context, in *GetSensorReportsRequest, opts ...grpc.CallOption) (*GetSensorReportsResponse, error)
+	GetSensorsReportsCount(ctx context.Context, in *GetSensorsReportsCountRequest, opts ...grpc.CallOption) (*GetSensorsReportsCountResponse, error)
 }
 
 type reportServiceClient struct {
@@ -105,6 +106,15 @@ func (c *reportServiceClient) GetSensorReports(ctx context.Context, in *GetSenso
 	return out, nil
 }
 
+func (c *reportServiceClient) GetSensorsReportsCount(ctx context.Context, in *GetSensorsReportsCountRequest, opts ...grpc.CallOption) (*GetSensorsReportsCountResponse, error) {
+	out := new(GetSensorsReportsCountResponse)
+	err := c.cc.Invoke(ctx, "/report.ReportService/GetSensorsReportsCount", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ReportServiceServer is the server API for ReportService service.
 // All implementations must embed UnimplementedReportServiceServer
 // for forward compatibility
@@ -123,6 +133,7 @@ type ReportServiceServer interface {
 	// Errors: NotFound, Internal
 	DoReportCommand(context.Context, *DoReportCommandRequest) (*DoReportCommandResponse, error)
 	GetSensorReports(context.Context, *GetSensorReportsRequest) (*GetSensorReportsResponse, error)
+	GetSensorsReportsCount(context.Context, *GetSensorsReportsCountRequest) (*GetSensorsReportsCountResponse, error)
 	mustEmbedUnimplementedReportServiceServer()
 }
 
@@ -150,6 +161,9 @@ func (UnimplementedReportServiceServer) DoReportCommand(context.Context, *DoRepo
 }
 func (UnimplementedReportServiceServer) GetSensorReports(context.Context, *GetSensorReportsRequest) (*GetSensorReportsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSensorReports not implemented")
+}
+func (UnimplementedReportServiceServer) GetSensorsReportsCount(context.Context, *GetSensorsReportsCountRequest) (*GetSensorsReportsCountResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSensorsReportsCount not implemented")
 }
 func (UnimplementedReportServiceServer) mustEmbedUnimplementedReportServiceServer() {}
 
@@ -290,6 +304,24 @@ func _ReportService_GetSensorReports_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ReportService_GetSensorsReportsCount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSensorsReportsCountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReportServiceServer).GetSensorsReportsCount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/report.ReportService/GetSensorsReportsCount",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReportServiceServer).GetSensorsReportsCount(ctx, req.(*GetSensorsReportsCountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ReportService_ServiceDesc is the grpc.ServiceDesc for ReportService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -324,6 +356,10 @@ var ReportService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetSensorReports",
 			Handler:    _ReportService_GetSensorReports_Handler,
+		},
+		{
+			MethodName: "GetSensorsReportsCount",
+			Handler:    _ReportService_GetSensorsReportsCount_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
