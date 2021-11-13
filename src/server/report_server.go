@@ -481,16 +481,9 @@ func (r *ReportServer) GetSensorsReportsCount(ctx context.Context, req *reportpb
 				fmt.Sprintf("Error while fetch data: %v", err),
 			)
 		}
-		hasUnCompletedCommand := false
-		for _, v := range result.Commands {
-			if !v.Done {
-				hasUnCompletedCommand = true
-				break
-			}
-		}
-		if hasUnCompletedCommand || len(result.Commands) == 0 {
-			counter[int(result.SensorID)]++
-		}
+
+		counter[int(result.SensorID)]++
+
 	}
 	var resArr []*reportpb.GetSensorsReportsCountResponse_SensorIdWithReportCount = []*reportpb.GetSensorsReportsCountResponse_SensorIdWithReportCount{}
 	for k, v := range counter {
