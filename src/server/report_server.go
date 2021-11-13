@@ -126,7 +126,7 @@ func (r *ReportServer) CreateReport(ctx context.Context, req *reportpb.SensorRep
 			},
 			Notification: &fcm.Notification{
 				Title: fault.Title,
-				Body:  fmt.Sprintf("اهمیت: %v\nآدرس: %v", "ساختمان صالی، تابلو برق طبقه اول", proiarity),
+				Body:  fmt.Sprintf("اهمیت: %v\nآدرس: %v", proiarity, "ساختمان صالی، تابلو برق طبقه اول"),
 				Color: "#df4759",
 			},
 		}
