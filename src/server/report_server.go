@@ -481,9 +481,12 @@ func (r *ReportServer) GetSensorsReportsCount(ctx context.Context, req *reportpb
 				fmt.Sprintf("Error while fetch data: %v", err),
 			)
 		}
-
 		counter[int(result.SensorID)]++
-
+	}
+	for i := 1; i <= 5; i++ {
+		if _ , exists := counter[i]; exists == false {
+			counter[i] = 0
+		}
 	}
 	var resArr []*reportpb.GetSensorsReportsCountResponse_SensorIdWithReportCount = []*reportpb.GetSensorsReportsCountResponse_SensorIdWithReportCount{}
 	for k, v := range counter {
@@ -492,7 +495,7 @@ func (r *ReportServer) GetSensorsReportsCount(ctx context.Context, req *reportpb
 			Count:    int32(v),
 		})
 	}
-
+	
 	return &reportpb.GetSensorsReportsCountResponse{
 		SensorIdWithReportCount: resArr,
 	}, nil
