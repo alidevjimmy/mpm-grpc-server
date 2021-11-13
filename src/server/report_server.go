@@ -104,7 +104,7 @@ func (r *ReportServer) CreateReport(ctx context.Context, req *reportpb.SensorRep
 	logServer.Add(logData)
 
 	var tokens []model.TokenModel
-	if err := postgresdb.DB.Model(&model.TokenModel{}).First(&tokens).Error; err != nil {
+	if err := postgresdb.DB.Find(&tokens).Error; err != nil {
 		return nil, status.Errorf(
 			codes.NotFound,
 			fmt.Sprintf("error while fetch data! : %v", err),
