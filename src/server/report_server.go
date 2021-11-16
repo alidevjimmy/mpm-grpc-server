@@ -291,7 +291,7 @@ func (r *ReportServer) GetReportLogs(ctx context.Context, req *reportpb.GetRepor
 }
 
 func SendNotif(msg fcm.Message) error {
-	client, err := fcm.NewClient("AAAAdM9sfFY:APA91bFNOEpLuPkHwSONoGbhm9zdoKT8lMwA4oIWV3zmC-04WS1d60FJi_ugu5PXt6TAF7Aic_GuMhV8onq4pp_ymlC0cqhYG78xC7vBoU2pUVWFqXw0pCjlhVJ_Br_-m0xYvFbW9bhv")
+	client, err := fcm.NewClient("")
 	if err != nil {
 		return err
 	}
